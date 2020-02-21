@@ -118,17 +118,15 @@ func ResolverMiddleware() graphql.FieldMiddleware {
 	}
 }
 
-func RequestMiddleware() graphql.RequestMiddleware {
-	return func(ctx context.Context, next func(ctx context.Context) []byte) []byte {
+func ResponseMiddleware() graphql.ResponseMiddleware {
+	return func(ctx context.Context, next graphql.ResponseHandler) *graphql.Response {
 		requestStartedCounter.Inc()
 
 		observerStart := time.Now()
 
 		res := next(ctx)
 
-		rctx := graphql.GetResolverContext(ctx)
-		reqCtx := graphql.GetRequestContext(ctx)
-		errList := reqCtx.GetErrors(rctx)
+		errList := res.Errors
 
 		var exitStatus string
 		if len(errList) > 0 {
